@@ -1,0 +1,45 @@
+
+
+# quartus_cdb -t eco.tcl
+
+# set result [ set_node_info -node $$node_id -info "Location Index" "PIN_A6" ]
+# set result [ set_node_info -node $$node_id -info "Current Strength" "4mA" ]
+
+package require ::quartus::chip_planner
+package require ::quartus::project
+load_chip_planner_utility_commands
+
+project_open ../base_project/project/base_project -revision base_project
+read_netlist
+set had_failure 0
+
+############
+# Index: 1 #
+############
+set node_id [ get_node_by_name -name |base_project|test_pin ]
+if { $$node_id == -1 } {
+     puts "FAIL: get_node_by_name -name |base_project|test_pin"
+    set had_failure 1
+} else {
+    set result [ set_node_info -node $$node_id -info $templ_into_type $templ_value ]
+    if { $$result == 0 } {
+        puts "FAIL"
+        set had_failure 1
+    } else {
+        puts "SET"
+    }
+}
+
+puts ""
+set drc_result [check_netlist_and_save]
+if { $$drc_result == 1 } {
+   puts "check_netlist_and_save: SUCCESS"
+} else {
+   puts "check_netlist_and_save: FAIL"
+}
+if { $$had_failure == 1 } {
+   puts "Not all set operations were successful"
+}
+
+project_close
+

@@ -10,7 +10,7 @@
 		<user_name>Page_0</user_name>
 		<page_flags>1</page_flags>
 		<bit0>
-			<sof_filename>../base_project/output_files/base_project.sof</sof_filename>
+			<sof_filename>$templ_quartus_out_dir/base_project.sof</sof_filename>
 		</bit0>
 	</sof_data>
 	<version>10</version>

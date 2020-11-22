@@ -1,3 +1,9 @@
+## Requirements
+
+Python packages:
+
+* progressbar2
+
 
 ## Procedure
 

@@ -9,7 +9,7 @@ package require ::quartus::chip_planner
 package require ::quartus::project
 load_chip_planner_utility_commands
 
-project_open ../base_project/project/base_project -revision base_project
+project_open $templ_quartus_prj_dir -revision base_project
 read_netlist
 set had_failure 0
 

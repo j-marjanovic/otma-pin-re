@@ -34,9 +34,26 @@ class EcoRunnerThread(Thread):
         copy_tree(self.BASE_PRJ_DIR, self.prj_dir)
         self._compile_fpga_project()
 
+        """
+        We first do an ECO on "Current Strength" even if this is not needed for
+        the results themselves, but it helps prevent Quartus throwing an error
+        (with a very cryptic error - "Error: Inconsistant set or reset of
+        compile started variable" in
+        `ADB_COMMAND_STACK::set_compile_started(bool)`).
+
+        The "Current Strength" attribute is anyway overridden later in the flow.
+        """
+        first_eco = True
+
         try:
             while True:
                 pin_name = self.work_queue.get(block=False)
+
+                if first_eco:
+                    self._gen_eco('"Current Strength"', self.CUR_STRENGTHS[0])
+                    self._run_eco()
+                    first_eco = False
+
                 self._gen_eco('"Location Index"', pin_name)
                 self._run_eco()
 

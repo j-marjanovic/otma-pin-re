@@ -11,29 +11,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-/** read file into a vector of bytes */
-std::vector<std::uint8_t> read_file(const std::string &filename) {
-
-  std::ifstream ifs{filename, std::ios::binary};
-
-  if (!ifs.good()) {
-    std::cout << "error opening file, exiting\n";
-    throw std::runtime_error("could not open file");
-  }
-
-  ifs.unsetf(std::ios_base::skipws);
-
-  ifs.seekg(0, ifs.end);
-  unsigned int length = ifs.tellg();
-  ifs.seekg(0, ifs.beg);
-
-  std::vector<std::uint8_t> bs;
-  bs.reserve(length);
-  bs.insert(bs.begin(), std::istream_iterator<std::uint8_t>(ifs),
-            std::istream_iterator<std::uint8_t>());
-
-  return bs;
-}
+#include "utils.hpp"
 
 /** uses some heuristics to detect if the change between two bitstreams
  * is related to FPGA pin configuration

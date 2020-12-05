@@ -1,19 +1,23 @@
 #! /usr/bin/env python3
 
 import os
+import subprocess
 import time
 from distutils.dir_util import copy_tree
 from queue import Empty, Queue
+from string import Template
+from threading import Thread
 
 import progressbar
 
 from EcoRunnerThread import EcoRunnerThread
+from gen_bitstreams import EcoRunnerThread, WorkQueue, create_pin_names
 
 
-class EcoRunnerThread_2p5V(EcoRunnerThread):
-    BITSTREAM_SUBDIR = "2p5V"
+class EcoRunnerThread_Sstl(EcoRunnerThread):
+    BITSTREAM_SUBDIR = "sstl"
 
-    CUR_STRENGTHS = ['"4mA"', '"8mA"', '"12mA"']
+    CUR_STRENGTHS = ['"4mA"', '"6mA"', '"8mA"']
 
     def run(self):
         """
@@ -47,6 +51,9 @@ class EcoRunnerThread_2p5V(EcoRunnerThread):
                 self._gen_eco('"Location Index"', pin_name)
                 self._run_eco()
 
+                self._gen_eco('"I/O Standard"', '"SSTL-15 Class I"')
+                self._run_eco()
+
                 for cur_strength in self.CUR_STRENGTHS:
                     self._gen_eco('"Current Strength"', cur_strength)
                     self._run_eco()
@@ -56,7 +63,7 @@ class EcoRunnerThread_2p5V(EcoRunnerThread):
                     dest_jic_file = os.path.join(
                         self.BITSTREAM_DIR,
                         self.BITSTREAM_SUBDIR,
-                        f"pin_ident_{pin_name_no_q}_{cur_strength_no_q}.jic",
+                        f"sstl_{pin_name_no_q}_{cur_strength_no_q}.jic",
                     )
                     self._gen_cof(dest_jic_file)
                     self._run_cof()
@@ -66,43 +73,16 @@ class EcoRunnerThread_2p5V(EcoRunnerThread):
             return
 
 
-class WorkQueue(Queue):
-    """ this is a little bit hackish - a queue and a progress bar combined in a single class """
-
-    def __init__(self, pin_list):
-        super().__init__()
-
-        self.prog_bar = progressbar.ProgressBar(max_value=len(pin_list))
-        self.prog_bar.start()
-
-        for pin in pin_list:
-            self.put(pin)
-
-    def get(self, block=True, timeout=None):
-        tmp = super().get(block=block, timeout=timeout)
-        self.prog_bar.update(self.prog_bar.value + 1)
-        return tmp
-
-
-def create_pin_names(pin_list_filename):
-    lines = open(pin_list_filename, "r").readlines()
-    pins = [line.strip() for line in lines]
-    full_pin_names = ['"PIN_{}"'.format(pin) for pin in pins]
-
-    return full_pin_names
-
-
 def main():
-    # PIN_LIST_FILENAME = "../resources/pin_list_test.txt"
     PIN_LIST_FILENAME = "../../resources/pin_list_5SGSMD5K1F40C1_full.txt"
 
     pin_names = create_pin_names(PIN_LIST_FILENAME)
 
-    work_queue = WorkQueue(pin_names[0:18])
+    work_queue = WorkQueue(pin_names)
 
-    THREAD_COUNT = 6
+    THREAD_COUNT = 8
 
-    threads = [EcoRunnerThread_2p5V(idx, work_queue) for idx in range(THREAD_COUNT)]
+    threads = [EcoRunnerThread_Sstl(idx, work_queue) for idx in range(THREAD_COUNT)]
     [thread.start() for thread in threads]
     [thread.join() for thread in threads]
 

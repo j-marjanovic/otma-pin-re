@@ -13,10 +13,11 @@ import progressbar
 
 class EcoRunnerThread(Thread):
 
-    BASE_PRJ_DIR = "../base_project"
-    WORK_PRJ_DIR = "../work/base_project"
-    LOG_DIR = "../work/log"
-    SCRIPT_DIR = "../work/script"
+    BASE_PRJ_DIR = "../../base_project"
+    WORK_PRJ_DIR = "../../work/base_project"
+    LOG_DIR = "../../work/log"
+    SCRIPT_DIR = "../../work/script"
+    BITSTREAM_DIR = "../../bitstreams/"
 
     CUR_STRENGTHS = ['"4mA"', '"8mA"', '"12mA"']
 
@@ -63,7 +64,10 @@ class EcoRunnerThread(Thread):
 
                     pin_name_no_q = pin_name.replace('"', "")
                     cur_strength_no_q = cur_strength.replace('"', "")
-                    dest_jic_file = f"../bitstreams/pin_ident_{pin_name_no_q}_{cur_strength_no_q}.jic"
+                    dest_jic_file = os.path.join(
+                        BITSTREAM_DIR,
+                        f"pin_ident_{pin_name_no_q}_{cur_strength_no_q}.jic",
+                    )
                     self._gen_cof(dest_jic_file)
                     self._run_cof()
 

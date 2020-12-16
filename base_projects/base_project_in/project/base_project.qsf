@@ -54,7 +54,7 @@ set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_location_assignment PIN_A6 -to test_pin
 set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to test_pin
-set_instance_assignment -name IO_STANDARD "SSTL-15 CLASS I" -to test_pin
+set_instance_assignment -name IO_STANDARD "2.5 V" -to test_pin
 set_global_assignment -name SYSTEMVERILOG_FILE ../hdl/base_project.sv
 set_global_assignment -name NUM_PARALLEL_PROCESSORS 1
 

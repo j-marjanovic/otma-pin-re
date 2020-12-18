@@ -37,7 +37,8 @@ class EcoRunnerThread(Thread):
         )
 
         # create a folder for the results
-        os.mkdir(os.path.join(self.RESULTS_DIR, self.RESULTS_SUBDIR))
+        if thread_idx == 0:
+            os.mkdir(os.path.join(self.RESULTS_DIR, self.RESULTS_SUBDIR))
 
         # prepare base project
         copy_tree(self.BASE_PRJ_DIR, self.prj_dir)
@@ -83,6 +84,7 @@ class EcoRunnerThread(Thread):
         )
 
         if rc != 0:
+            self.f_log.write(f"> run_eco failed with rc = {rc}\n")
             raise RuntimeError("Running ECO failed")
 
     def _gen_cof(self):
@@ -132,9 +134,12 @@ class EcoRunnerThread(Thread):
         )
 
         if rc != 0:
+            self.f_log.write(f"> compile_fpga_project failed with rc = {rc}\n")
             raise RuntimeError("Compilation failed")
 
     def eco(self, info_type, value, node="|base_project|test_pin"):
+        self.f_log.write(f"> eco {info_type} {value}\n")
+
         self._gen_eco(info_type, value, node)
         self._run_eco()
 
@@ -153,6 +158,8 @@ class EcoRunnerThread(Thread):
                     f_out.write(line + "\n")
 
     def set_test_pin_io_std(self, io_std):
+        self.f_log.write(f"> set_test_pin_io_std {io_std}\n")
+
         def f(line, f_out):
             if (
                 line.find("set_instance_assignment -name IO_STANDARD") == 0
@@ -167,6 +174,8 @@ class EcoRunnerThread(Thread):
         self._modify_qsf_file(f, None)
 
     def set_test_pin_loc(self, loc):
+        self.f_log.write(f"> set_test_pin_loc {loc}\n")
+
         def f(line, f_out):
             if (
                 line.find("set_location_assignment") == 0
@@ -179,6 +188,8 @@ class EcoRunnerThread(Thread):
         self._modify_qsf_file(f, None)
 
     def set_output_term_off(self):
+        self.f_log.write(f"> set_output_term_off\n")
+
         def f(line, f_out):
             f_out.write(line)
 
@@ -191,6 +202,8 @@ class EcoRunnerThread(Thread):
         self._modify_qsf_file(f, append_lines)
 
     def set_output_term_default(self):
+        self.f_log.write(f"> set_output_term_default\n")
+
         def f(line, f_out):
             if (
                 line.find("set_instance_assignment -name OUTPUT_TERMINATION") == 0
@@ -203,6 +216,8 @@ class EcoRunnerThread(Thread):
         self._modify_qsf_file(f, None)
 
     def set_cur_strength(self, cur):
+        self.f_log.write(f"> set_cur_strength {cur}\n")
+
         def f(line, f_out):
             f_out.write(line)
 
@@ -215,6 +230,7 @@ class EcoRunnerThread(Thread):
         self._modify_qsf_file(f, append_lines)
 
     def set_cur_strength_default(self):
+        self.f_log.write(f"> set_cur_strength_default\n")
         def f(line, f_out):
             if (
                 line.find("set_instance_assignment -name CURRENT_STRENGTH_NEW") == 0
@@ -227,6 +243,8 @@ class EcoRunnerThread(Thread):
         self._modify_qsf_file(f, None)
 
     def store_results(self, out_file):
+        self.f_log.write(f"> store results: {out_file}\n")
+
         self._gen_cof()
         self._run_cof()
 

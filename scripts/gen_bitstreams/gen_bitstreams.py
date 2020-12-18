@@ -6,6 +6,7 @@ from distutils.dir_util import copy_tree
 from queue import Empty, Queue
 
 import progressbar
+import psutil
 
 from EcoRunnerThread import EcoRunnerThread
 from PinInfoParser import PinInfoParser
@@ -14,6 +15,25 @@ from PinInfoParser import PinInfoParser
 class EcoRunnerThreadOut(EcoRunnerThread):
     BASE_PRJ_DIR = "../../base_projects/base_project_out"
     RESULTS_SUBDIR = "out"
+
+    PINS_NO_LVDS = [
+        "U15",
+        "T16",
+        "P16",
+        "N16",
+        "M23",
+        "L23",
+        "J23",
+        "J24",
+        "R32",
+        "P32",
+        "N32",
+        "M32",
+        "D33",
+        "C33",
+        "E34",
+        "D34",
+    ]
 
     def run(self):
         STRATIXV_PIN_INFO = "../../resources/5sgsd5.txt"
@@ -28,11 +48,10 @@ class EcoRunnerThreadOut(EcoRunnerThread):
                 self.set_test_pin_io_std("2.5 V")
                 self.compile_fpga_project()
 
-
                 for pu in ["on", "off"]:
                     self.eco('"Weak Pull Up"', f'"{pu}"')
 
-                    for cur in ["4mA", "8mA", "12mA"]:
+                    for cur in ["4mA", "8mA", "12mA", "16mA"]:
                         self.eco('"Current Strength"', f'"{cur}"')
                         self.store_results(f"{pin_name}_2V5_{cur}_pu_{pu}_dly_no.zip")
 
@@ -51,7 +70,11 @@ class EcoRunnerThreadOut(EcoRunnerThread):
                 self.compile_fpga_project()
                 self.store_results(f"{pin_name}_sstl15_class1_default.zip")
 
-                self.eco('"On-Chip Termination"', f'"Off"', node="|base_project|test_pin~output")
+                self.eco(
+                    '"On-Chip Termination"',
+                    f'"Off"',
+                    node="|base_project|test_pin~output",
+                )
                 for cur in ["4mA", "6mA", "8mA", "10mA", "12mA"]:
                     self.eco('"Current Strength"', f'"{cur}"')
                     self.store_results(f"{pin_name}_sstl15_class1_term_off_{cur}.zip")
@@ -59,16 +82,21 @@ class EcoRunnerThreadOut(EcoRunnerThread):
                 self.set_test_pin_io_std("SSTL-15 CLASS II")
                 self.compile_fpga_project()
 
-                self.eco('"On-Chip Termination"', f'"Off"', node="|base_project|test_pin~output")
+                self.eco(
+                    '"On-Chip Termination"',
+                    f'"Off"',
+                    node="|base_project|test_pin~output",
+                )
                 for cur in ["8mA", "16mA"]:
                     self.eco('"Current Strength"', f'"{cur}"')
                     self.store_results(f"{pin_name}_sstl15_class2_term_off_{cur}.zip")
 
                 if pins[pin_name].tx_rx_ch[-1] == "p":
                     # 1
-                    self.set_test_pin_io_std("LVDS")
-                    self.compile_fpga_project()
-                    self.store_results(f"{pin_name}_lvds.zip")
+                    if pin_name not in self.PINS_NO_LVDS:
+                        self.set_test_pin_io_std("LVDS")
+                        self.compile_fpga_project()
+                        self.store_results(f"{pin_name}_lvds.zip")
 
                     # 2
                     self.set_test_pin_io_std("DIFFERENTIAL 1.5-V SSTL")
@@ -142,12 +170,12 @@ def create_pin_names(pin_list_filename):
 
 
 def main():
-    PIN_LIST_FILENAME = "../../resources/pin_list_5SGSMD5K1F40C1_full.txt"
+    PIN_LIST_FILENAME = "../../resources/pin_list_5SGSMD5K1F40C1_8A.txt"
 
     pin_names = create_pin_names(PIN_LIST_FILENAME)
     work_queue = WorkQueue(pin_names)
 
-    THREAD_COUNT = 1
+    THREAD_COUNT = max(psutil.cpu_count(False) - 2, 1)
 
     threads = [EcoRunnerThreadOut(idx, work_queue) for idx in range(THREAD_COUNT)]
     [thread.start() for thread in threads]

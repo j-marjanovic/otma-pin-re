@@ -8,58 +8,108 @@ from queue import Empty, Queue
 import progressbar
 
 from EcoRunnerThread import EcoRunnerThread
+from PinInfoParser import PinInfoParser
 
 
-class EcoRunnerThread_2p5V(EcoRunnerThread):
-    BITSTREAM_SUBDIR = "2p5V"
-
-    CUR_STRENGTHS = ['"4mA"', '"8mA"', '"12mA"']
+class EcoRunnerThreadOut(EcoRunnerThread):
+    BASE_PRJ_DIR = "../../base_projects/base_project_out"
+    RESULTS_SUBDIR = "out"
 
     def run(self):
-        """
-        We first do an ECO on "Current Strength" even if this is not needed for
-        the results themselves, but it helps prevent Quartus throwing an error
-        (with a very cryptic error - "Error: Inconsistant set or reset of
-        compile started variable" in
-        `ADB_COMMAND_STACK::set_compile_started(bool)`).
-
-        The "Current Strength" attribute is anyway overridden later in the flow.
-        """
-        first_eco = True
-
-        try:
-            os.mkdir(os.path.join(self.BITSTREAM_DIR, self.BITSTREAM_SUBDIR))
-        except FileExistsError:
-            pass
-
-        copy_tree(self.BASE_PRJ_DIR, self.prj_dir)
-        self._compile_fpga_project()
+        STRATIXV_PIN_INFO = "../../resources/5sgsd5.txt"
+        parser = PinInfoParser(STRATIXV_PIN_INFO, "F1517")
+        pins = parser.get_all_pins()
 
         try:
             while True:
                 pin_name = self.work_queue.get(block=False)
 
-                if first_eco:
-                    self._gen_eco('"Current Strength"', self.CUR_STRENGTHS[0])
-                    self._run_eco()
-                    first_eco = False
+                self.set_test_pin_loc("PIN_" + pin_name)
+                self.set_test_pin_io_std("2.5 V")
+                self.compile_fpga_project()
 
-                self._gen_eco('"Location Index"', pin_name)
-                self._run_eco()
 
-                for cur_strength in self.CUR_STRENGTHS:
-                    self._gen_eco('"Current Strength"', cur_strength)
-                    self._run_eco()
+                for pu in ["on", "off"]:
+                    self.eco('"Weak Pull Up"', f'"{pu}"')
 
-                    pin_name_no_q = pin_name.replace('"', "")
-                    cur_strength_no_q = cur_strength.replace('"', "")
-                    dest_jic_file = os.path.join(
-                        self.BITSTREAM_DIR,
-                        self.BITSTREAM_SUBDIR,
-                        f"pin_ident_{pin_name_no_q}_{cur_strength_no_q}.jic",
-                    )
-                    self._gen_cof(dest_jic_file)
-                    self._run_cof()
+                    for cur in ["4mA", "8mA", "12mA"]:
+                        self.eco('"Current Strength"', f'"{cur}"')
+                        self.store_results(f"{pin_name}_2V5_{cur}_pu_{pu}_dly_no.zip")
+
+                self.eco('"Weak Pull Up"', f'"off"')
+                self.eco('"Current Strength"', '"4mA"')
+
+                for dly in ["1", "2", "0"]:
+                    self.eco('"D5 Delay Chain"', f'"{dly}"')
+                    self.store_results(f"{pin_name}_2V5_4mA_pu_off_dly_{dly}.zip")
+
+                self.set_test_pin_io_std("SSTL-15")
+                self.compile_fpga_project()
+                self.store_results(f"{pin_name}_sstl15_default.zip")
+
+                self.set_test_pin_io_std("SSTL-15 CLASS I")
+                self.compile_fpga_project()
+                self.store_results(f"{pin_name}_sstl15_class1_default.zip")
+
+                self.eco('"On-Chip Termination"', f'"Off"', node="|base_project|test_pin~output")
+                for cur in ["4mA", "6mA", "8mA", "10mA", "12mA"]:
+                    self.eco('"Current Strength"', f'"{cur}"')
+                    self.store_results(f"{pin_name}_sstl15_class1_term_off_{cur}.zip")
+
+                self.set_test_pin_io_std("SSTL-15 CLASS II")
+                self.compile_fpga_project()
+
+                self.eco('"On-Chip Termination"', f'"Off"', node="|base_project|test_pin~output")
+                for cur in ["8mA", "16mA"]:
+                    self.eco('"Current Strength"', f'"{cur}"')
+                    self.store_results(f"{pin_name}_sstl15_class2_term_off_{cur}.zip")
+
+                if pins[pin_name].tx_rx_ch[-1] == "p":
+                    # 1
+                    self.set_test_pin_io_std("LVDS")
+                    self.compile_fpga_project()
+                    self.store_results(f"{pin_name}_lvds.zip")
+
+                    # 2
+                    self.set_test_pin_io_std("DIFFERENTIAL 1.5-V SSTL")
+                    self.compile_fpga_project()
+                    self.store_results(f"{pin_name}_diff_sstl15_default.zip")
+
+                    # 3
+                    self.set_test_pin_io_std("DIFFERENTIAL 1.5-V SSTL CLASS I")
+                    self.compile_fpga_project()
+                    self.store_results(f"{pin_name}_diff_sstl15_class1_default.zip")
+
+                    # 3b
+                    self.set_output_term_off()
+
+                    for cur in ["4mA", "6mA", "8mA", "10mA", "12mA"]:
+                        self.set_cur_strength(cur)
+                        self.compile_fpga_project()
+                        self.store_results(
+                            f"{pin_name}_diff_sstl15_class1_term_off_{cur}.zip"
+                        )
+
+                    self.set_output_term_default()
+                    self.set_cur_strength_default()
+
+                    # 4
+                    self.set_test_pin_io_std("DIFFERENTIAL 1.5-V SSTL CLASS II")
+                    self.compile_fpga_project()
+                    self.store_results(f"{pin_name}_diff_sstl15_class2_default.zip")
+
+                    # 4b
+                    self.set_output_term_off()
+
+                    for cur in ["8mA", "16mA"]:
+                        self.set_cur_strength(cur)
+                        self.compile_fpga_project()
+                        self.store_results(
+                            f"{pin_name}_diff_sstl15_class2_term_off_{cur}.zip"
+                        )
+
+                    self.set_output_term_default()
+                    self.set_cur_strength_default()
 
         except Empty:
             self.f_log.write("> queue empty, thread exiting")
@@ -87,22 +137,19 @@ class WorkQueue(Queue):
 def create_pin_names(pin_list_filename):
     lines = open(pin_list_filename, "r").readlines()
     pins = [line.strip() for line in lines]
-    full_pin_names = ['"PIN_{}"'.format(pin) for pin in pins]
 
-    return full_pin_names
+    return pins
 
 
 def main():
-    # PIN_LIST_FILENAME = "../resources/pin_list_test.txt"
     PIN_LIST_FILENAME = "../../resources/pin_list_5SGSMD5K1F40C1_full.txt"
 
     pin_names = create_pin_names(PIN_LIST_FILENAME)
+    work_queue = WorkQueue(pin_names)
 
-    work_queue = WorkQueue(pin_names[0:18])
+    THREAD_COUNT = 1
 
-    THREAD_COUNT = 6
-
-    threads = [EcoRunnerThread_2p5V(idx, work_queue) for idx in range(THREAD_COUNT)]
+    threads = [EcoRunnerThreadOut(idx, work_queue) for idx in range(THREAD_COUNT)]
     [thread.start() for thread in threads]
     [thread.join() for thread in threads]
 

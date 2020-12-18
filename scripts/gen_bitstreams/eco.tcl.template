@@ -16,9 +16,9 @@ set had_failure 0
 ############
 # Index: 1 #
 ############
-set node_id [ get_node_by_name -name |base_project|test_pin ]
+set node_id [ get_node_by_name -name $templ_node ]
 if { $$node_id == -1 } {
-     puts "FAIL: get_node_by_name -name |base_project|test_pin"
+     puts "FAIL: get_node_by_name -name $templ_node"
     set had_failure 1
 } else {
     set result [ set_node_info -node $$node_id -info $templ_into_type $templ_value ]

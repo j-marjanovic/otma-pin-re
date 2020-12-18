@@ -251,7 +251,7 @@ class EcoRunnerThread(Thread):
         out_file_full = os.path.join(self.RESULTS_DIR, self.RESULTS_SUBDIR, out_file)
 
         stat = os.stat(self.output_filename_full)
-        self.f_log.write(f"stat {out_file}: {stat}")
+        self.f_log.write(f"stat {out_file}: {stat}\n")
 
         with zipfile.ZipFile(
             out_file_full, mode="w", compression=zipfile.ZIP_LZMA
@@ -275,3 +275,6 @@ class EcoRunnerThread(Thread):
             rpt_bytes = open(rpt_filename, "rb").read()
             with zp.open("fit_report.txt", "w") as rpt:
                 rpt.write(rpt_bytes)
+
+    def log_to_file(self, msg):
+        self.f_log.write(f"# {msg}\n")

@@ -67,7 +67,7 @@ class PinInfoParser:
                         else:
                             self.log.debug("pin does not match, skipping: %s", line)
                     except Exception as e:
-                        self.log.warning("unable to parse line: %s - %s", line, e)
+                        self.log.debug("unable to parse line: %s - %s", line, e)
 
         assert self.pins, "the parser should find plenty of pins, but none found"
 
@@ -112,7 +112,6 @@ def main():
 
     for pin in pins.items():
         print(pin)
-
 
 if __name__ == "__main__":
     main()

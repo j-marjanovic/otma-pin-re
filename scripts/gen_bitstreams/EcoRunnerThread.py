@@ -137,6 +137,24 @@ class EcoRunnerThread(Thread):
             self.f_log.write(f"> compile_fpga_project failed with rc = {rc}\n")
             raise RuntimeError("Compilation failed")
 
+    def gen_qsys(self):
+        """ Only for the bidir project """
+
+        self.f_log.write(f"> gen_qsys\n")
+
+        rc = subprocess.call(
+            ["./gen_qsys.sh"],
+            cwd=os.path.join(self.prj_dir, "scripts"),
+            stderr=subprocess.STDOUT,
+            bufsize=1,
+            universal_newlines=True,
+            stdout=self.f_log,
+        )
+
+        if rc != 0:
+            self.f_log.write(f"> gen_qsys failed with rc = {rc}\n")
+            raise RuntimeError("Gen Qsys failed")
+
     def eco(self, info_type, value, node="|base_project|test_pin"):
         self.f_log.write(f"> eco {info_type} {value}\n")
 

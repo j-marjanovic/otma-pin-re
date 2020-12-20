@@ -53,7 +53,6 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_location_assignment PIN_A4 -to test_pin
-set_instance_assignment -name CURRENT_STRENGTH_NEW 4MA -to test_pin
 set_instance_assignment -name IO_STANDARD "2.5 V" -to test_pin
 set_global_assignment -name QIP_FILE ../ip_cores/io_tester/synthesis/io_tester.qip
 set_global_assignment -name SYSTEMVERILOG_FILE ../hdl/base_project.sv

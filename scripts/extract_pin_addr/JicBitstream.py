@@ -8,6 +8,7 @@ class JicBitstream:
     def __init__(self, jic_filename):
         jic = open(jic_filename, "rb").read()
         jic = np.frombuffer(jic, dtype=np.uint8)
+        self.jic_uint8 = jic
         jic = np.unpackbits(jic)
         self.jic = jic
 

@@ -20,6 +20,17 @@ class JicBitstream:
     def get_els(self, addrs):
         return self.jic[addrs]
 
+    def find_jjjj_seqs(self):
+        JJJJ = np.array([ord('j')]*4, dtype=np.uint8)
+
+        possible_locs = np.where(self.jic_uint8 == ord('j'))[0]
+        found_locs = []
+
+        for loc in possible_locs:
+            if np.all(self.jic_uint8[loc:loc+4] == JJJJ):
+                found_locs.append(loc)
+
+        return found_locs
 
 class JicBitstreamZip(JicBitstream):
     def __init__(self, zip_filename):

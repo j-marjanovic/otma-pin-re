@@ -14,7 +14,7 @@ from PinInfoParser import PinInfoParser
 
 class EcoRunnerThreadBidir(EcoRunnerThread):
     BASE_PRJ_DIR = "../../base_projects/base_project_bidir"
-    RESULTS_SUBDIR = "bidir"
+    RESULTS_SUBDIR = "bidir_bank3c"
 
     def run(self):
         STRATIXV_PIN_INFO = "../../resources/5sgsd5.txt"
@@ -31,6 +31,14 @@ class EcoRunnerThreadBidir(EcoRunnerThread):
                 self.set_test_pin_loc("PIN_" + pin_name)
                 self.set_test_pin_io_std("2.5 V")
                 self.compile_fpga_project()
+                self.store_results(f"{pin_name}_2V5_on_chip_term.zip")
+
+                self.eco(
+                    '"On-Chip Termination"',
+                    f'"Off"',
+                    node="|base_project|test_pin~output",
+                )
+                self.store_results(f"{pin_name}_2V5_on_chip_term_off.zip")
 
                 for pu in ["on", "off"]:
                     self.eco('"Weak Pull Up"', f'"{pu}"')
@@ -79,8 +87,11 @@ class EcoRunnerThreadBidir(EcoRunnerThread):
                     self.eco('"Current Strength"', f'"{cur}"')
                     self.store_results(f"{pin_name}_sstl15_class2_term_off_{cur}.zip")
 
-                if pins[pin_name].tx_rx_ch[-1] == "p" and not (
-                    pins[pin_name].tx_rx_ch.find("DIFFIO_TX") == 0
+                # disable the entire diff compilation
+                if (
+                    False
+                    and pins[pin_name].tx_rx_ch[-1] == "p"
+                    and not (pins[pin_name].tx_rx_ch.find("DIFFIO_TX") == 0)
                 ):
                     # 1
                     """
@@ -166,7 +177,7 @@ def create_pin_names(pin_list_filename):
 
 
 def main():
-    PIN_LIST_FILENAME = "../../resources/pin_list_5SGSMD5K1F40C1_8A.txt"
+    PIN_LIST_FILENAME = "../../resources/pin_list_5SGSMD5K1F40C1_3C.txt"
 
     pin_names = create_pin_names(PIN_LIST_FILENAME)
     work_queue = WorkQueue(pin_names)

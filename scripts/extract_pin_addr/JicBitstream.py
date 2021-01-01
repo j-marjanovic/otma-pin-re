@@ -37,5 +37,6 @@ class JicBitstreamZip(JicBitstream):
         with zipfile.ZipFile(zip_filename, mode="r") as zip:
             jic = zip.open("base_project.jic", "r").read()
             jic = np.frombuffer(jic, dtype=np.uint8)
+            self.jic_uint8 = jic
             jic = np.unpackbits(jic)
             self.jic = jic

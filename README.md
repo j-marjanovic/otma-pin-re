@@ -1,17 +1,10 @@
-## Requirements
+# Stratix V pin configuration RE
 
-Python packages:
+This project aims to reverse engineer the pin configuration (e.g. IO standard,
+direction, pull-up and termination resistors, ...) in a bitstream for Stratix
+V.
 
-* progressbar2
-
-
-## Procedure
-
-1. start with a base project and a list of pin locations to test
-2. compile the project for the first time
-3. for each pin location in the list of pin locations ...
-    1. ECO the pin to the pin location from the list
-    2. for drive strength in {4mA, 8mA, 12mA} ...
-        1. ECO the driving strength
-        2. prepare the .cof file (output filename)
-        3. generate .jic file
+Compared to other FPGA reverse-engineering efforts this project has a very
+limited scope. The objective is to understand enough of the bitstream
+organization to be able to extract the DDR3 pin out on the Pikes Peak board
+(https://j-marjanovic.io/stratix-v-accelerator-card-from-ebay.html).

@@ -17,4 +17,4 @@ with their function as a part of the DDR3 interace.
 
 ---
 
-Stratix is trademarks of Intel Corporation or its subsidiaries.
+Stratix is a trademark of Intel Corporation or its subsidiaries.

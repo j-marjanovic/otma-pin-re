@@ -12,5 +12,5 @@ organization to be able to extract the DDR3 pin out on the Pikes Peak board
 ## The final result
 
 The final result of this RE effort is available in
-[scripts/extract_pin_addr/07_application.ipynb] as a list of pins, annotated
+[scripts/extract_pin_addr/07_application.ipynb](scripts/extract_pin_addr/07_application.ipynb) as a list of pins, annotated
 with their function as a part of the DDR3 interace.

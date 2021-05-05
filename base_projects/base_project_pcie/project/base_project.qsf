@@ -43,7 +43,7 @@ set_global_assignment -name TOP_LEVEL_ENTITY pcie_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 19.1.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "20:22:36  MAY 03, 2021"
 set_global_assignment -name LAST_QUARTUS_VERSION "19.1.0 Standard Edition"
-set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY ../output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP "-40"
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 100
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 256

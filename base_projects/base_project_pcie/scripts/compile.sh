@@ -5,7 +5,7 @@ set -e
 
 # configuration
 
-PRJ_NAME=base_project_pcie
+PRJ_NAME=base_project
 PRJ=../project/$PRJ_NAME
 
 

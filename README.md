@@ -15,6 +15,15 @@ The final result of this RE effort is available in
 [scripts/extract_pin_addr/07_application.ipynb](scripts/extract_pin_addr/07_application.ipynb) as a list of pins, annotated
 with their function as a part of the DDR3 interace.
 
+
+## Required packages
+
+### scripts/gen_bitstreams
+
+```
+pip3 install progressbar2 psutil
+```
+
 ---
 
 Stratix is a trademark of Intel Corporation or its subsidiaries.

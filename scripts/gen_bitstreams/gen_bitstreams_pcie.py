@@ -139,7 +139,6 @@ def create_all_configs() -> List[PcieConfig]:
         c.vendor_id = vendor_id
         all_combs.append(c)
 
-    """
     for device_id in [1, 2, 0xFFFE]:
         c = copy.copy(base_conf)
         c.device_id = device_id
@@ -149,7 +148,27 @@ def create_all_configs() -> List[PcieConfig]:
         c = copy.copy(base_conf)
         c.class_code = class_code
         all_combs.append(c)
-    """
+
+    for subsystem_vendor_id in [1, 2, 0xFFFE]:
+        c = copy.copy(base_conf)
+        c.subsystem_vendor_id = subsystem_vendor_id
+        all_combs.append(c)
+
+    for subsystem_device_id in [1, 2, 0xFFFE]:
+        c = copy.copy(base_conf)
+        c.subsystem_device_id = subsystem_device_id
+        all_combs.append(c)
+
+    for bar0_size_mask in [20, 21, 28]:
+        c = copy.copy(base_conf)
+        c.bar0_size_mask = bar0_size_mask
+        all_combs.append(c)
+
+    for bar2_size_mask in [15, 16, 28]:
+        c = copy.copy(base_conf)
+        c.bar2_type = 2
+        c.bar2_size_mask = bar2_size_mask
+        all_combs.append(c)
 
     for c in all_combs:
         print(c)
@@ -166,7 +185,8 @@ def main():
 
     work_queue = WorkQueue(configs)
 
-    THREAD_COUNT = 2  # max(psutil.cpu_count(False) - 1, 1)
+    # Jan, buy more RAM!
+    THREAD_COUNT = 4 # max(psutil.cpu_count(False) // 2, 1)
 
     threads = [EcoRunnerThreadPcie(idx, work_queue) for idx in range(THREAD_COUNT)]
     [thread.start() for thread in threads]
